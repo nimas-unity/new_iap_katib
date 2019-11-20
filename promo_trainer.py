@@ -7,7 +7,7 @@ from trainer_utils import box, get_dataset
 
 import tensorflow as tf
 import tensorflow_transform as tft
-
+from datetime import datetime
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -19,13 +19,15 @@ def train(model,
           steps_per_epoch, 
           validation_data , 
           validation_steps,
-          epochs):
+          epochs,
+          callbacks):
     box ('Model {} is training'.format(model.name))
     model.fit(dataset_train,
-              steps_per_epoch=646, 
-              validation_data = dataset_test, 
-              validation_steps=683,
-              epochs=5)
+              steps_per_epoch=steps_per_epoch, 
+              validation_data = validation_data, 
+              validation_steps=validation_steps,
+              epochs=epochs,
+              callbacks=callbacks)
     
     box ('Model {} training is finished.'.format(model.name), symb='+')
     
@@ -65,6 +67,10 @@ def main(dataset_train,dataset_test):
     args = parser.parse_args()
     #model = WDModel('test',args).model
     model = WDModel(args).model
+    
+    logdir = "Logs/" + str(model.name) + "/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = [tf.keras.callbacks.TensorBoard(log_dir=logdir)]
+    
     '''
     # Assign model variables to commandline arguments
     model.TRAIN_PATHS = args.train_data_paths
@@ -80,10 +86,11 @@ def main(dataset_train,dataset_test):
     box ('Model success' if len(model.layers)>0 else 'Model failed!',symb='+')
     model = train(model,
                   dataset_train,
-                  steps_per_epoch=1, 
+                  steps_per_epoch=646, 
                   validation_data = dataset_test, 
-                  validation_steps=1,
-                  epochs=1)
+                  validation_steps=683,
+                  epochs=5,
+                  callbacks=tensorboard_callback)
     
     
 if __name__ == '__main__':
