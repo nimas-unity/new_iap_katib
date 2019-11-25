@@ -1,3 +1,4 @@
+%%writefile promo_model.py
 
 import tensorflow as tf
 import tensorflow_transform as tft
@@ -95,7 +96,7 @@ class WDModel():
         model = Model(inputs=inputs, outputs=merged_out, name=args.run_id)
         
         
-        metrics = [AUC(num_thresholds=500, curve='PR', name='auc_pr'),
+        metrics = [AUC(num_thresholds=500, curve='PR', name='auc-pr'),
                    AUC(num_thresholds=500, curve='ROC', name='auc-roc')]
 
         optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr)
