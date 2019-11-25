@@ -1,4 +1,5 @@
-#import sys; sys.argv = ['']        
+#%%writefile promo_trainer.py
+import sys; sys.argv = ['']        
 import argparse
 from promo_model import WDModel
 import trainer_utils
@@ -13,7 +14,6 @@ warnings.filterwarnings("ignore")
 
 
 
-
 def train(model,
           dataset_train,
           steps_per_epoch, 
@@ -21,15 +21,16 @@ def train(model,
           validation_steps,
           epochs,
           callbacks):
-    box ('Model {} is training'.format(model.name))
+    #box ('Model {} is training'.format(model.name))
     model.fit(dataset_train,
               steps_per_epoch=steps_per_epoch, 
               validation_data = validation_data, 
               validation_steps=validation_steps,
               epochs=epochs,
-              callbacks=callbacks)
+              callbacks=callbacks,
+              verbose=0)
     
-    box ('Model {} training is finished.'.format(model.name), symb='+')
+    #box ('Model {} training is finished.'.format(model.name), symb='+')
     
     return model
     
@@ -50,11 +51,19 @@ def main(dataset_train,dataset_test):
         default = "gs://unity-ads-ds-prd-users/villew/promo/output4/"
     )
     
+    
+    parser.add_argument(
+        '--log_dir',
+        help = 'log directory',
+        type = str,
+        default = "train"
+    )    
+    
     parser.add_argument(
         '--run_id',
         help = 'Name/id for run',
         type = str,
-        default = "Test-0"
+        default = "Testing-0"
     )
     
     parser.add_argument(
@@ -68,8 +77,8 @@ def main(dataset_train,dataset_test):
     #model = WDModel('test',args).model
     model = WDModel(args).model
     
-    logdir = "Logs/" + str(model.name) + "/" + datetime.now().strftime("%Y%m%d-%H%M%S")
-    tensorboard_callback = [tf.keras.callbacks.TensorBoard(log_dir=logdir)]
+    tensorboard_callback = [tf.keras.callbacks.TensorBoard(log_dir=args.log_dir),
+                            trainer_utils.MetricsBoard()]
     
     '''
     # Assign model variables to commandline arguments
@@ -83,7 +92,7 @@ def main(dataset_train,dataset_test):
     '''
 
     
-    box ('Model success' if len(model.layers)>0 else 'Model failed!',symb='+')
+    #box ('Model success' if len(model.layers)>0 else 'Model failed!',symb='+')
     model = train(model,
                   dataset_train,
                   steps_per_epoch=646, 
@@ -112,6 +121,6 @@ if __name__ == '__main__':
     dataset_train = get_dataset(TRAIN_BUCKET_PATH, tf_transform_output, label_key, weight_key, batch_size)
     dataset_test = get_dataset(TEST_BUCKET_PATH, tf_transform_output, label_key, weight_key, batch_size)
     
-    box ('Weights are used!' if len(next(iter(dataset_train)))==3 else 'No weights!')
+    #box ('Weights are used!' if len(next(iter(dataset_train)))==3 else 'No weights!')
     
     main(dataset_train,dataset_test)
