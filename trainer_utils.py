@@ -1,18 +1,20 @@
+%%writefile trainer_utils.py
 
 from tensorflow.python.keras.engine.base_layer import Layer
 import numpy as np
-from tensorflow.keras import backend as K
+from tensorflow.compat.v1.keras import backend as K
 import tensorflow as tf
 import tensorflow_transform as tft
 
 
-import os
+import os,sys
 import numpy as np
 import tensorflow as tf
 import time
 import json
-from tensorflow.keras import backend as K
+
 from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.keras.callbacks import Callback
 from tensorflow.python.data.experimental.ops import interleave_ops
 from tensorflow.python.data.experimental.ops import optimization
 from tensorflow.python.data.experimental.ops import parsing_ops
@@ -66,8 +68,8 @@ class MetricsBoard(TensorBoard):
         """Set model params and params useful for writing"""
         self.model = model
         self.sess = K.get_session()
-        self.train_file_writer = tf.summary.FileWriter(self.training_log_dir)
-        self.val_file_writer = tf.summary.FileWriter(self.val_log_dir)
+        self.train_file_writer = tf.compat.v1.summary.FileWriter(self.training_log_dir)
+        self.val_file_writer = tf.compat.v1.summary.FileWriter(self.val_log_dir)
         super(MetricsBoard, self).set_model(model)
 
     def on_batch_end(self, batch, logs):
@@ -90,7 +92,7 @@ class MetricsBoard(TensorBoard):
         for name, value in logs.items():
             if name in ['batch', 'size']:
                 continue
-            summary = tf.Summary()
+            summary = tf.compat.v1.Summary()
             summary_value = summary.value.add()
             if isinstance(value, np.ndarray):
                 summary_value.simple_value = value.item()
@@ -276,3 +278,14 @@ def box(text, maxlen=59, symb='#'):
     {}
     '''.format(symb*maxlen,symb*str_len,text.strip().upper(),symb*str_len,symb*maxlen)
     print(print_statement)
+    
+
+class Metrics(Callback):
+    def on_batch_end(self, batch, logs):
+        return
+    def on_epoch_end(self, epoch, logs):
+        print ('epoch %d:' %(epoch))
+        print ('loss=%f' %(logs['loss']))
+        print ('auc-pr=%f' %(logs['auc-pr']))
+        print ('auc-roc=%f' %(logs['auc-roc']))       
+        return
