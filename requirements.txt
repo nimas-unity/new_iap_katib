@@ -1,5 +1,5 @@
 google-cloud-storage
-tensorflow==1.14
+tensorflow==1.15.0
 tensorflow_transform==0.13.0
 apache_beam[gcp]==2.12.0
 google-cloud-core==0.28.1
